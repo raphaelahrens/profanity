@@ -18,4 +18,5 @@ With the `-c` it is possible to force profanity to colorize found word in the ou
 
 
 ## Examples dictionaries
-
+[Profanity example](github.com/tantSinnister/profanity/blob/master/examples/profanity.txt "Profanity example")
+[Release example](github.com/tantSinnister/profanity/blob/master/examples/release.txt "Release example")
