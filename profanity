@@ -1,9 +1,5 @@
 #!/usr/bin/env bash
 
-if [[ -z "$PAGER" ]]; then
-    PAGER=less
-fi
-
 #print usage message
 usage() {
     printf "Usage: %s: [-c] [-a] [-h] <dictionary>\n" "$0"
@@ -83,7 +79,7 @@ profanity_check() {
         error_msg "There is no profanity in $profanity_dict" 3
     fi
 
-    grep "${arguments[@]}" "${pattern[@]}" "${files[@]}" | $PAGER -F
+    grep "${arguments[@]}" "${pattern[@]}" "${files[@]}"
 }
 
 profanity_check $*
