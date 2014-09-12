@@ -1,0 +1,89 @@
+#!/bin/env bash
+
+if [[ -z "$PAGER" ]]; then
+    PAGER=less
+fi
+
+#print usage message
+usage() {
+    printf "Usage: %s: [-c] [-a] [-h] <dictionary>\n" "$0"
+    printf "     -c      force color output.\n"
+    printf "     -a      check the all files recursively.\n"
+    printf "     -h      print this message.\n"
+    printf "<dictionary> the dictionary with the profanity.\n"
+}
+
+#print an error message
+error_msg() {
+    usage
+    printf "Error %s\n" "$1"
+    exit $2
+}
+
+#test if we are in a git repo or not
+in_git_repo() {
+    git rev-parse --is-inside-work-tree &> /dev/null
+    return $?
+}
+
+
+profanity_check() {
+    gitflag=1;
+    arguments=("-Iins")
+    pattern=()
+    files=()
+    color=0
+
+    #parse the args
+    local OPTIND=1
+    while getopts "ac" name
+    do
+        case $name in
+        a) gitflag=0;;
+        c) color=1;;
+        ?) usage
+           exit 1;;
+        esac
+    done
+    #shift the flags out of the scope
+    shift $((OPTIND - 1))
+    #set the dictionary
+    profanity_dict=$1;
+    if [[ ! -r $profanity_dict ]]; then
+        error_msg "$profanity_dict does not exsits." 2
+    fi
+
+    #set the color if needed
+    if [[ $color -eq 1 ]] || [[ -t 1 ]]; then
+     arguments+=("--color=always")
+    fi
+
+    # if we are in a git repo collect the changes files
+    if [[ $gitflag -eq 1 ]] && in_git_repo ; then
+        for line in $(git ls-files --exclude-standard -mo);  do
+            files+=("$line")
+        done
+        # quit if there are no changed files
+        if [[ ${#files[@]} -le 0 ]]; then
+            error_msg "No files in this repo where changed." 4
+        fi
+    #else go over the entire directory
+    elif [[ $gitflag -eq 0 ]]; then
+        files+=(".")
+        arguments+=("-R")
+    else
+        error_msg "Unknown flag setting." 128
+    fi
+    
+    #read in the patterns from the dictionary
+    while IFS= read -r line; do
+        pattern+=("-e" "$line")
+    done < "$profanity_dict"
+    if [[ ${#pattern[@]} -le 0 ]];then
+        error_msg "There is no profanity in $profanity_dict" 3
+    fi
+
+    grep "${arguments[@]}" "${pattern[@]}" "${files[@]}" | $PAGER -F
+}
+
+profanity_check $*
