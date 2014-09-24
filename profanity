@@ -61,7 +61,8 @@ profanity_check() {
         done
         # quit if there are no changed files
         if [[ ${#files[@]} -le 0 ]]; then
-            error_msg "No files in this repo where changed." 4
+            printf "No files in this repo where changed.\n"
+            exit 0
         fi
     #else go over the entire directory
     elif [[ $gitflag -eq 0 ]]; then
