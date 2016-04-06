@@ -14,7 +14,7 @@ usage() {
 error_msg() {
     usage
     printf "Error %s\n" "$1"
-    exit $2
+    exit "$2"
 }
 
 #test if the given directory is a git repo or not 
@@ -23,7 +23,7 @@ in_git_repo() {
     return $?
 }
 
-
+# Check for profanity inside the given files
 profanity_check() {
     gitflag=1;
     arguments=("-Iins")
@@ -89,4 +89,4 @@ profanity_check() {
     grep "${arguments[@]}" "${pattern[@]}" "${files[@]}"
 }
 
-profanity_check $*
+profanity_check "$@"
